@@ -585,7 +585,7 @@ std::string Fuzzer::WriteToOutputCorpus(const Unit &U) {
      assert(IsASCII(U));
    if (Options.CovSuffixDir.empty())
      return;
-   std::string Path = DirPlusFile(Options.CovSuffixDir, Hash(U) + (Reduced ? "-red":"+cov"));
+   std::string Path = DirPlusFile(Options.CovSuffixDir, Hash(U) + (Reduced ? "-size":"+cov"));
    WriteToFile(U, Path);
    if (Options.Verbosity >= 2)
      Printf("Written %zd bytes to %s\n", U.size(), Path.c_str());
