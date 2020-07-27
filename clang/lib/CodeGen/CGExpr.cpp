@@ -2996,6 +2996,20 @@ static void emitCheckHandlerCall(CodeGenFunction &CGF,
   }
 }
 
+static bool checkNameAFLEdgeSanitizer(StringRef CheckName) {
+    std::string name = CheckName.str();
+    
+    bool ret = name.compare("add_overflow") == 0
+        || name.compare("sub_overflow") == 0
+        || name.compare("mul_overflow") == 0
+        || name.compare("negate_overflow") == 0
+        || name.compare("divrem_overflow") == 0
+        || name.compare("shift_out_of_bounds") == 0
+        || name.compare("load_invalid_value") == 0
+        || name.compare("out_of_bounds") == 0;
+    return ret;
+}
+
 void CodeGenFunction::EmitCheck(
     ArrayRef<std::pair<llvm::Value *, SanitizerMask>> Checked,
     SanitizerHandler CheckHandler, ArrayRef<llvm::Constant *> StaticArgs,
@@ -3046,6 +3060,13 @@ void CodeGenFunction::EmitCheck(
   llvm::BasicBlock *Cont = createBasicBlock("cont");
   llvm::BasicBlock *Handlers = createBasicBlock("handler." + CheckName);
   llvm::Instruction *Branch = Builder.CreateCondBr(JointCond, Cont, Handlers);
+
+  // fuzzer_edge_sanitizer, src: https://github.com/evanmak/savior-source/blob/master/patches/clang-3.6.patch
+  if (checkNameAFLEdgeSanitizer(CheckName)) {
+      Branch->setMetadata("afl_edge_sanitizer",
+                          llvm::MDNode::get(CGM.getLLVMContext(), None));
+  }
+
   // Give hint that we very much don't expect to execute the handler
   // Value chosen to match UR_NONTAKEN_WEIGHT, see BranchProbabilityInfo.cpp
   llvm::MDBuilder MDHelper(getLLVMContext());
