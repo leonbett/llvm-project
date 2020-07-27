@@ -47,6 +47,7 @@ struct FuzzingOptions {
   std::string OutputCorpus;
   std::string ArtifactPrefix = "./";
   std::string ExactArtifactPath;
+  std::string CovSuffixDir;
   std::string ExitOnSrcPos;
   std::string ExitOnItem;
   std::string FocusFunction;

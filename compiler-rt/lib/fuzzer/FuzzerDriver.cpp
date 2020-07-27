@@ -682,6 +682,8 @@ int FuzzerDriver(int *argc, char ***argv, UserCallback Callback) {
     Options.ArtifactPrefix = Flags.artifact_prefix;
   if (Flags.exact_artifact_path)
     Options.ExactArtifactPath = Flags.exact_artifact_path;
+  if (Flags.cov_suffix_dir)
+    Options.CovSuffixDir = Flags.cov_suffix_dir;
   Vector<Unit> Dictionary;
   if (Flags.dict)
     if (!ParseDictionaryFile(FileToString(Flags.dict), &Dictionary))
