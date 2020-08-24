@@ -348,6 +348,7 @@ void Fuzzer::PrintStats(const char *Where, const char *End, size_t Units,
     Printf(" units: %zd", Units);
 
   Printf(" exec/s: %zd", ExecPerSec);
+  Printf(" time: %zd", secondsSinceProcessStartUp());
   Printf(" rss: %zdMb", GetPeakRSSMb());
   Printf("%s", End);
 }
