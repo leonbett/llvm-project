@@ -348,6 +348,7 @@ void Fuzzer::PrintStats(const char *Where, const char *End, size_t Units,
     Printf(" units: %zd", Units);
 
   Printf(" exec/s: %zd", ExecPerSec);
+  Printf(" time: %zd", secondsSinceProcessStartUp());
   Printf(" rss: %zdMb", GetPeakRSSMb());
   Printf("%s", End);
 }
@@ -580,6 +581,17 @@ std::string Fuzzer::WriteToOutputCorpus(const Unit &U) {
   return Path;
 }
 
+ void Fuzzer::WriteToSeparateDir(const Unit &U, bool Reduced) {
+   if (Options.OnlyASCII)
+     assert(IsASCII(U));
+   if (Options.CovSuffixDir.empty())
+     return;
+   std::string Path = DirPlusFile(Options.CovSuffixDir, Hash(U) + (Reduced ? "-size":"+cov"));
+   WriteToFile(U, Path);
+   if (Options.Verbosity >= 2)
+     Printf("Written %zd bytes to %s\n", U.size(), Path.c_str());
+ }
+
 void Fuzzer::WriteUnitToFileWithPrefix(const Unit &U, const char *Prefix) {
   if (!Options.SaveArtifacts)
     return;
@@ -609,6 +621,7 @@ void Fuzzer::ReportNewCoverage(InputInfo *II, const Unit &U) {
   MD.RecordSuccessfulMutationSequence();
   PrintStatusForNewUnit(U, II->Reduced ? "REDUCE" : "NEW   ");
   WriteToOutputCorpus(U);
+  WriteToSeparateDir(U, II->Reduced);
   NumberOfNewUnitsAdded++;
   CheckExitOnSrcPosOrItem(); // Check only after the unit is saved to corpus.
   LastCorpusUpdateRun = TotalNumberOfRuns;
